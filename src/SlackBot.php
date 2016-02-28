@@ -13,27 +13,58 @@ use GuzzleHttp\Client;
 
 class SlackBot
 {
+    /**
+     * @var Client
+     */
     protected $client;
 
+    /**
+     * @var
+     */
     protected $bot;
 
+    /**
+     * @var
+     */
     protected $channel;
 
+    /**
+     * @var
+     */
     protected $username;
 
+    /**
+     * @var
+     */
     protected $icon;
 
+    /**
+     * @var array
+     */
     protected $attachment = [];
 
+    /**
+     * @var array
+     */
     protected $header = [];
 
+    /**
+     * @var
+     */
     protected $color;
 
+    /**
+     * SlackBot constructor.
+     */
     public function __construct()
     {
         $this->client = new Client(['verify' => false]);
     }
 
+    /**
+     * @param $text
+     * @throws SlackBotException
+     */
     public function send($text)
     {
         if (! $this->bot) {
@@ -58,6 +89,10 @@ class SlackBot
         $this->clearAttachment();
     }
 
+    /**
+     * @param array $array
+     * @return $this
+     */
     public function header($array = [])
     {
         $this->header = $array;
@@ -65,6 +100,12 @@ class SlackBot
         return $this;
     }
 
+    /**
+     * @param $title
+     * @param $value
+     * @param $color
+     * @return $this
+     */
     public function attachment($title, $value, $color)
     {
         $this->color = $color;
@@ -79,6 +120,10 @@ class SlackBot
         return $this;
     }
 
+    /**
+     * @param $color
+     * @return $this
+     */
     public function color($color)
     {
         $this->color = $color;
@@ -86,13 +131,25 @@ class SlackBot
         return $this;
     }
 
-    public function bot($name)
+    /**
+     * @param $bot
+     * @return $this
+     */
+    public function bot($bot)
     {
-        $this->bot = config('slack.bot.' . $name);
+        if (! $this->isUrl($bot)) {
+            $bot = config('slack.bot.' . $bot);
+        }
+
+        $this->bot = config('slack.bot.' . $bot);
 
         return $this;
     }
 
+    /**
+     * @param $recipient
+     * @return $this
+     */
     public function to($recipient)
     {
         $this->channel = $recipient;
@@ -100,6 +157,10 @@ class SlackBot
         return $this;
     }
 
+    /**
+     * @param $sender
+     * @return $this
+     */
     public function withName($sender)
     {
         $this->username = $sender;
@@ -107,6 +168,10 @@ class SlackBot
         return $this;
     }
 
+    /**
+     * @param $icon
+     * @return $this
+     */
     public function avatar($icon)
     {
         $this->icon = sprintf(':%s:', $icon);
@@ -114,13 +179,27 @@ class SlackBot
         return $this;
     }
 
+    /**
+     * @return Client
+     */
     public function getClient()
     {
         return $this->client;
     }
 
+
+    /**
+     * @return $this
+     */
     private function clearAttachment()
     {
         $this->attachment = [];
+
+        return $this;
+    }
+
+    private function isUrl($url)
+    {
+        return ! filter_var($url, FILTER_VALIDATE_URL) === FALSE;
     }
 }
